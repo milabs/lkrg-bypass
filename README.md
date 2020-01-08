@@ -22,3 +22,4 @@ The repository is organized as a set of methods which I developed while I was pl
 - `KASLR` bypass was considered to be done by the exploit
 - `SMAP`/`SMEP` bypass was not considered to be in the scope of the exploit
 
+Here I have to say few words about `SMAP`/`SMEP`. I'm pretty sure that of two features only one makes sense: `SMAP`. `SMEP` it's not a big deal and it has nothing against the ROP which is widely used by exploits. So, let's not consider `SMEP` as a problem at all because it's possible to make the exploitation without exectution the code from user-mode address space. `SMAP` is the only valuable security feature of the CPU but the exploitation can be done without touching the user space from the context of the kernel. In other words, it's possible to have a ROP chain reliably delivered to the kernel without the need of bypassing `SMAP`. Again, let's put it out of the scope at least now.
