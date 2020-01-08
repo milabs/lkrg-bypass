@@ -5,7 +5,11 @@ Software-based CFI mitigation (pCFI) was intoduced in LKRG 0.6 (https://www.open
 
 The idea behind this mitigation is that LKRG walks through the call stack checking if the stack-frame has the address which belongs to the kernel. Once it detects the address which points outside the kernel's text it will trigger an alarm.
 
-Bypassing LKRG's pCFI mitigation is trivial and can be done by wrapping the `get_root()` function as follows:
+Bypassing LKRG's pCFI mitigation will be implemented within 2 steps:
+ - facking stack frames while operating
+ - postponing the execution of privelege escalation payload with `schedule_on_each_cpu()`
+
+Here is the code which helps to fake stack frames:
 
 ~~~
 struct stack_frame {
@@ -46,3 +50,5 @@ Here, `cfi_bypass_enter` is a macro which fakes `N` frames by:
  - replacing `return_address` of each frame so it will point to some address in kernel's text
 
 Once the call to `get_root_real()` is done `cfi_bypass_leave` macro does the opposite: it restores all the saved frames from the `frames` array.
+
+As for the privelege escalation part - its execution is postponed using `schedule_on_each_cpu()` function. For that `module_alloc()` is used to allocate excutable/writable memory to which the "shellcode" containing the privelege escalation logic is copied.
