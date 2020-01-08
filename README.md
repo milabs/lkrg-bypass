@@ -15,3 +15,10 @@ Even though it was stated that LKRG is bypassable by design the project continue
 
 Personally, I found the LKRG source code very well written and I consider it as a great engineering project wich has an amazing integration into the low level kernel's stuff. I really appreciate Adam's effort he put to develop the project. It's an amazing example of how it's possible to develop a high quality out-of-tree kernel module which has so deep kernel intergation.
 
+The repository is organized as a set of methods which I developed while I was playing with LKRG. The following pre-conditions were considered:
+
+- [CVE-2017-1000112](https://github.com/xairy/kernel-exploits/tree/master/CVE-2017-1000112) exploit was used as a test sample base (cc: @xairy)
+- `Ubuntu 16.04.4 LTS` with kernel `4.8.0-53-generic` was used as a test box along with vagrant (vbox)
+- `KASLR` bypass was considered to be done by the exploit
+- `SMAP`/`SMEP` bypass was not considered to be in the scope of the exploit
+
